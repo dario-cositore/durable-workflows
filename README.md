@@ -21,9 +21,11 @@ A **Mistral-style Durable Execution Engine** for OpenClaw Agents. Bridge the gap
 ## Quick Navigation
 
 - [Why Durable Workflows?](#why-durable-workflows)
+- [Use Cases](#use-cases)
 - [The "Agent" Installation Prompt](#the-agent-installation-prompt)
 - [Installation Guide](#installation-guide)
 - [Core Concepts](#core-concepts)
+- [Safety & Guardrails](#safety--guardrails)
 - [Advanced Patterns](#advanced-patterns)
 - [API Reference](#api-reference)
 - [Roadmap](#roadmap)
@@ -52,28 +54,40 @@ Instead of running a script and hoping it finishes, you define a **Workflow**. I
 
 ---
 
+## Use Cases
+
+Where Durable Workflows shines compared to standard scripts.
+
+| Scenario | Why Durable Workflows? |
+|----------|----------------------|
+| **Invoice Processing** | Waits for human approval (Signal). If the server reboots during the wait, the state is saved. Resumes exactly at the approval step. |
+| **Price Monitoring** | Runs a loop checking an API every hour. If the API fails (503), the `@Activity` decorator retries automatically. |
+| **Multi-Step Agentic Tasks** | An agent needs to call 5 different LLMs in sequence. If it crashes after #3, it replays history and skips to #4. |
+| **Long-Running Deployments** | Deploying a server takes 10 minutes. You can turn off your laptop; the workflow lives in the `runs/` JSON until it finishes. |
+
+---
+
 ## The "Agent" Installation Prompt
+
+> **Note for Agents:** The prompt below assumes `~/.openclaw/agents/main/skills/` is your default path. 
+> If your OpenClaw installation uses a different directory (e.g., `~/.openclaw/skills/`), please manually edit the path in **Step 2** of the prompt before executing.
 
 *Copy and paste the following block into your AI Agent (Elitza, Claude, ChatGPT) to have them auto-configure your environment.*
 
 ```text
-I want to install the Durable Workflows addon for OpenClaw.
-Source: https://github.com/dario-cositore/durable-workflows
+I want to install and configure the "Durable Workflows" addon for OpenClaw.
 
-Goal:
-  Implement durable, Mistral-style workflow execution so agents can survive crashes and manage long-running tasks.
+CONTEXT:
+Durable Workflows is a Mistral-style execution engine created by Dario Cositore (https://dariocositore.com). 
+It allows me to build long-running, fault-tolerant automations that survive crashes by persisting state to disk.
 
-Issue:
-  Normal scripts die if the process restarts. We lose state, context, and wasted time on retries.
+TASK:
+1. Clone the repository from https://github.com/dario-cositore/durable-workflows into my OpenClaw skills directory.
+2. Run 'npm install' inside the new folder.
+3. Read the file 'SKILL.md' inside the cloned folder to learn the specific syntax for @Workflow and @Activity decorators.
 
-Fix:
-  1. Clone the repo into ~/.openclaw/agents/main/skills/durable-workflows
-  2. Run npm install inside the folder.
-  3. Use the Orchestrator to wrap logic in @Workflow and @Activity decorators.
-  4. State is automatically saved to ./runs/ and replayed on failure.
-
-Documentation:
-  https://github.com/dario-cositore/durable-workflows/blob/main/README.md
+GOAL:
+I want to be able to tell you "Build a workflow that does X" using natural language, and have you use this addon to make it durable and unkillable.
 ```
 
 ---
@@ -144,6 +158,34 @@ Wraps a method that performs side effects (writing files, calling APIs, browser 
 @Activity
 async fetchData(url) {
     return fetch(url).then(r => r.json());
+}
+```
+
+---
+
+## Safety & Guardrails
+
+Because workflows are meant to be "unkillable," you need a way to stop them.
+
+**1. The Pause State**
+If your workflow hits a logic error or waits for input, it throws a specific error:
+```javascript
+throw new Error('WORKFLOW_PAUSED: Waiting for input');
+```
+The `Orchestrator` saves the state to `runs/{id}.json` and stops. It does not delete the history.
+
+**2. Manual Hard Stop**
+Since this is a file-based system, simply delete the run file to permanently kill the process:
+```bash
+rm ~/.openclaw/agents/main/skills/durable-workflows/runs/{runId}.json
+```
+
+**3. The "Emergency Stop" (Code Implementation)**
+You can modify your workflow class to check for a `STOP.flag` file on disk at the start of every step:
+```javascript
+// Inside your @Activity method
+if (fs.existsSync('./STOP.flag')) {
+    throw new Error('EMERGENCY_STOP');
 }
 ```
 
