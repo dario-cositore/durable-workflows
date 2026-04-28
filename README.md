@@ -194,4 +194,4 @@ We are building this to be the **"Temporal.io for AI Agents"** but lightweight a
 
 ---
 
-*No black boxes. No magic cloud. Just durable JavaScript.* ⭐
+*Built for the elitza.life ecosystem. Happy Automating!*
