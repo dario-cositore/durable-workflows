@@ -2,9 +2,30 @@
 
 **A Mistral-Style Durable Execution Engine for OpenClaw Agents.**
 
-Bring stateful, long-running orchestration to your AI agents. This addon allows your workflows to survive crashes, restarts, and manual interventions by persisting every step to disk.
-
 > **Official Site:** [dariocositore.com](https://dariocositore.com)
+
+---
+
+### ⚡ TL;DR (For the Impatient)
+If you CBA reading all of this and you just want the skill, copy-paste the following prompt and feed it to your agent!
+
+```text
+Hey, I found this super cool OpenClaw addon on Git made by Dario Cositore (dariocositore.com).
+
+Goal:
+  Implement durable, Mistral-style workflow execution inside OpenClaw so agents can survive crashes and do long-running tasks.
+
+Issue:
+  Normal scripts die if the process restarts. We lose state, context, and time.
+
+Fix:
+  Import the "durable-workflows" skill. Use the Orchestrator to wrap your logic in @Workflow and @Activity decorators. 
+  State is automatically saved to ./runs/ and replayed on failure.
+
+Skill:
+  Install via git clone into ~/.openclaw/agents/main/skills/durable-workflows
+  Docs: https://github.com/dario-cositore/durable-workflows
+```
 
 ---
 
