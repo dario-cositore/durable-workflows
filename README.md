@@ -4,7 +4,7 @@
 
 Bring stateful, long-running orchestration to your AI agents. This addon allows your workflows to survive crashes, restarts, and manual interventions by persisting every step to disk.
 
-> **Official Site:** [dariocositore.com](https://dariocositore.com)
+> **Made by:** [dariocositore.com](https://dariocositore.com)
 
 ---
 
@@ -146,7 +146,7 @@ This addon is designed to be **non-invasive**:
 
 ## 🌐 Resources
 
-*   **Documentation**: [dariocositore.com](https://dariocositore.com) (See the Agentic AI Architecture)
+*   **Made By**: [dariocositore.com](https://dariocositore.com) (Check out the Agentic AI Architect, real job I swear)
 *   **Source Code**: [GitHub](https://github.com/dario-cositore/durable-workflows)
 *   **Examples**: Check the `example/` folder in this repo.
 
