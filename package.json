@@ -1,20 +1,15 @@
 {
   "name": "durable-workflows",
   "version": "1.0.0",
-  "description": "Mistral-style durable execution and stateful orchestration for OpenClaw agents.",
-  "main": "lib/engine.mjs",
+  "description": "Mistral-style durable execution for OpenClaw.",
+  "type": "module",
+  "main": "lib/orchestrator.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test-run.mjs"
   },
-  "keywords": [
-    "openclaw",
-    "agents",
-    "workflows",
-    "durable-execution",
-    "orchestration"
-  ],
-  "author": "Dario Cositore",
-  "license": "MIT",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "uuid": "^9.0.1"
   }
