@@ -1,4 +1,4 @@
-# Durable Workflows ⚙️
+# Durable Workflows
 
 **A Mistral-Style Durable Execution Engine for OpenClaw Agents.**
 
@@ -8,13 +8,13 @@ Bring stateful, long-running orchestration to your AI agents. This addon allows 
 
 ---
 
-## 🌟 Overview
+## Overview
 
 When building complex AI automations, a single crash can lose hours of progress. **Durable Workflows** solves this by implementing an **Event-Sourced Architecture** (inspired by Temporal and Mistral Workflows).
 
 Instead of running a script and hoping it finishes, you define a **Workflow**. If the power goes out, the system replays the history and resumes exactly where it left off.
 
-## 📦 Installation
+## Installation
 
 ### 1. Download the Addon
 Clone or download this repository into your OpenClaw skills directory:
@@ -47,7 +47,7 @@ Ensure the structure looks like this:
 
 ---
 
-## 🚀 Quick Start (Code Example)
+## Quick Start (Code Example)
 
 You define your logic using JavaScript Classes and Decorators.
 
@@ -105,7 +105,7 @@ If the script crashes during `processData`, simply run it again. The `Orchestrat
 
 ---
 
-## 🧩 Key Features
+## Key Features
 
 | Feature | Description |
 |---------|-------------|
@@ -116,7 +116,7 @@ If the script crashes during `processData`, simply run it again. The `Orchestrat
 
 ---
 
-## 🛠️ Core Concepts
+## Core Concepts
 
 ### The `@Workflow` Decorator
 Marks a class as a stateful orchestration unit. It links the instance to the persistence engine.
@@ -135,7 +135,7 @@ await orch.run(MyWorkflow, { /* input */ });
 
 ---
 
-## 🔗 Integration with OpenClaw
+## Integration with OpenClaw
 
 This addon is designed to be **non-invasive**:
 1.  It does not modify your global OpenClaw installation.
@@ -152,4 +152,4 @@ This addon is designed to be **non-invasive**:
 
 ---
 
-*Built for the Elitza ecosystem. Happy Automating! ⭐*
+*Built for the Elitza ecosystem. Happy Automating!*
