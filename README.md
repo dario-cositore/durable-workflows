@@ -12,7 +12,7 @@
   </a>
 </p>
 
-A **Mistral-style Durable Execution Engine** for OpenClaw Agents. Bridge the gap between simple scripts and production-grade, fault-tolerant AI automation.
+A **Mistral-style Durable Execution Engine** for OpenClaw Agents. Fault-tolerant AI automation.
 
 > **Official Site:** [dariocositore.com](https://dariocositore.com) | **Discord:** [OpenClaw](https://discord.com/invite/clawd)
 
