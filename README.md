@@ -152,4 +152,4 @@ This addon is designed to be **non-invasive**:
 
 ---
 
-*Built for the Elitza ecosystem. Happy Automating!*
+*Built for the elitza.life ecosystem. Happy Automating!*
