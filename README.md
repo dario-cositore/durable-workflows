@@ -1,41 +1,20 @@
-# Durable Workflows ⚙️
+# Durable Workflows
 
 **A Mistral-Style Durable Execution Engine for OpenClaw Agents.**
 
-> **Official Site:** [dariocositore.com](https://dariocositore.com)
+Bring stateful, long-running orchestration to your AI agents. This addon allows your workflows to survive crashes, restarts, and manual interventions by persisting every step to disk.
+
+> **Made by:** [dariocositore.com](https://dariocositore.com)
 
 ---
 
-### ⚡ TL;DR (For the Impatient)
-If you CBA reading all of this and you just want the skill, copy-paste the following prompt and feed it to your agent!
-
-```text
-Hey, I found this super cool OpenClaw addon on Git made by Dario Cositore (dariocositore.com).
-
-Goal:
-  Implement durable, Mistral-style workflow execution inside OpenClaw so agents can survive crashes and do long-running tasks.
-
-Issue:
-  Normal scripts die if the process restarts. We lose state, context, and time.
-
-Fix:
-  Import the "durable-workflows" skill. Use the Orchestrator to wrap your logic in @Workflow and @Activity decorators. 
-  State is automatically saved to ./runs/ and replayed on failure.
-
-Skill:
-  Install via git clone into ~/.openclaw/agents/main/skills/durable-workflows
-  Docs: https://github.com/dario-cositore/durable-workflows
-```
-
----
-
-## 🌟 Overview
+## Overview
 
 When building complex AI automations, a single crash can lose hours of progress. **Durable Workflows** solves this by implementing an **Event-Sourced Architecture** (inspired by Temporal and Mistral Workflows).
 
 Instead of running a script and hoping it finishes, you define a **Workflow**. If the power goes out, the system replays the history and resumes exactly where it left off.
 
-## 📦 Installation
+## Installation
 
 ### 1. Download the Addon
 Clone or download this repository into your OpenClaw skills directory:
@@ -68,7 +47,7 @@ Ensure the structure looks like this:
 
 ---
 
-## 🚀 Quick Start (Code Example)
+## Quick Start (Code Example)
 
 You define your logic using JavaScript Classes and Decorators.
 
@@ -126,7 +105,7 @@ If the script crashes during `processData`, simply run it again. The `Orchestrat
 
 ---
 
-## 🧩 Key Features
+## Key Features
 
 | Feature | Description |
 |---------|-------------|
@@ -137,7 +116,7 @@ If the script crashes during `processData`, simply run it again. The `Orchestrat
 
 ---
 
-## 🛠️ Core Concepts
+## Core Concepts
 
 ### The `@Workflow` Decorator
 Marks a class as a stateful orchestration unit. It links the instance to the persistence engine.
@@ -156,7 +135,7 @@ await orch.run(MyWorkflow, { /* input */ });
 
 ---
 
-## 🔗 Integration with OpenClaw
+## Integration with OpenClaw
 
 This addon is designed to be **non-invasive**:
 1.  It does not modify your global OpenClaw installation.
@@ -167,10 +146,10 @@ This addon is designed to be **non-invasive**:
 
 ## 🌐 Resources
 
-*   **Documentation**: [dariocositore.com](https://dariocositore.com) (See the Agentic AI Architecture)
+*   **Made By**: [dariocositore.com](https://dariocositore.com) (Check out the Agentic AI Architect, real job I swear)
 *   **Source Code**: [GitHub](https://github.com/dario-cositore/durable-workflows)
 *   **Examples**: Check the `example/` folder in this repo.
 
 ---
 
-*Built for the Elitza ecosystem. Happy Automating! ⭐*
+*Built for the Elitza ecosystem. Happy Automating!*
