@@ -1,0 +1,21 @@
+{
+  "name": "durable-workflows",
+  "version": "1.0.0",
+  "description": "Mistral-style durable execution and stateful orchestration for OpenClaw agents.",
+  "main": "lib/engine.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "openclaw",
+    "agents",
+    "workflows",
+    "durable-execution",
+    "orchestration"
+  ],
+  "author": "Dario Cositore",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^9.0.1"
+  }
+}
