@@ -36,7 +36,7 @@ A **Mistral-style Durable Execution Engine** for OpenClaw Agents. Bridge the gap
 
 When building complex AI automations, a single crash can lose hours of progress. **Durable Workflows** solves this by implementing an **Event-Sourced Architecture** (inspired by Temporal.io and Mistral Workflows).
 
-Instead of running a script and hoping it finishes, you define a **Workflow**. If the server reboots, the system replays the history and resumes exactly where it left off.
+Instead of running a script and hoping it finishes, you extend the **Workflow** base class. If the server reboots, the system replays the history and resumes exactly where it left off without executing the successful parts again.
 
 ### The Problem
 | Failure Point | Consequence |
@@ -50,7 +50,7 @@ Instead of running a script and hoping it finishes, you define a **Workflow**. I
 |--------------|---------|
 | **Event History** | Every step is saved to `runs/{id}.json`. |
 | **Deterministic Replay** | The engine skips completed steps on restart. |
-| **Activity Isolation** | Side effects (API calls) are wrapped so they can be retried or skipped. |
+| **Activity Isolation** | Side effects (API calls) are wrapped in `this.step` so they can be retried or skipped. |
 
 ---
 
@@ -61,7 +61,7 @@ Where Durable Workflows shines compared to standard scripts.
 | Scenario | Why Durable Workflows? |
 |----------|----------------------|
 | **Invoice Processing** | Waits for human approval (Signal). If the server reboots during the wait, the state is saved. Resumes exactly at the approval step. |
-| **Price Monitoring** | Runs a loop checking an API every hour. If the API fails (503), the `@Activity` decorator retries automatically. |
+| **Price Monitoring** | Runs a loop checking an API every hour. If the API fails (503), you can safely retry it. |
 | **Multi-Step Agentic Tasks** | An agent needs to call 5 different LLMs in sequence. If it crashes after #3, it replays history and skips to #4. |
 | **Long-Running Deployments** | Deploying a server takes 10 minutes. You can turn off your laptop; the workflow lives in the `runs/` JSON until it finishes. |
 
@@ -84,7 +84,7 @@ It allows me to build long-running, fault-tolerant automations that survive cras
 TASK:
 1. Clone the repository from https://github.com/dario-cositore/durable-workflows into my OpenClaw skills directory.
 2. Run 'npm install' inside the new folder.
-3. Read the file 'SKILL.md' inside the cloned folder to learn the specific syntax for @Workflow and @Activity decorators.
+3. Read the file 'SKILL.md' inside the cloned folder to learn the specific syntax for extending the Workflow class and using this.step().
 
 GOAL:
 I want to be able to tell you "Build a workflow that does X" using natural language, and have you use this addon to make it durable and unkillable.
@@ -118,7 +118,7 @@ Ensure the directory structure matches the following:
 └── durable-workflows/
     ├── lib/
     │   ├── orchestrator.mjs
-    │   └── decorators.mjs
+    │   └── workflow.mjs
     ├── runs/          # State is saved here
     └── README.md
 ```
@@ -135,30 +135,28 @@ import { Orchestrator } from './lib/orchestrator.mjs';
 const orch = new Orchestrator('./runs');
 ```
 
-### 2. The `@Workflow` Decorator
-Marks a class as a stateful orchestration unit. It links the instance to the persistence engine.
+### 2. Extending the `Workflow` Class
+Creates a stateful orchestration unit linked to the persistence engine.
 
 ```javascript
-import { Workflow } from './lib/decorators.mjs';
+import { Workflow } from './lib/workflow.mjs';
 
-@Workflow('MyAutomation')
-class MyWorkflow {
+class MyWorkflow extends Workflow {
     async execute(input) {
-        // Pure logic here
+        // Pure logic here. Side effects go inside this.step()
     }
 }
 ```
 
-### 3. The `@Activity` Decorator
-Wraps a method that performs side effects (writing files, calling APIs, browser actions).
+### 3. The `this.step()` Method
+Wraps dangerous side effects (writing files, calling APIs, browser actions) safely.
 - **Before Execution:** Checks if this exact action was already completed.
 - **After Execution:** Saves the result to the event history.
 
 ```javascript
-@Activity
-async fetchData(url) {
-    return fetch(url).then(r => r.json());
-}
+const data = await this.step('fetchData', async () => {
+    return fetch(input.url).then(r => r.json());
+});
 ```
 
 ---
@@ -168,25 +166,16 @@ async fetchData(url) {
 Because workflows are meant to be "unkillable," you need a way to stop them.
 
 **1. The Pause State**
-If your workflow hits a logic error or waits for input, it throws a specific error:
+If your workflow hits a logic error or waits for input, throw a descriptive error:
 ```javascript
 throw new Error('WORKFLOW_PAUSED: Waiting for input');
 ```
-The `Orchestrator` saves the state to `runs/{id}.json` and stops. It does not delete the history.
+The `Orchestrator` saves the state to `runs/{id}.json` and safely exits. It does not delete history.
 
 **2. Manual Hard Stop**
 Since this is a file-based system, simply delete the run file to permanently kill the process:
 ```bash
 rm ~/.openclaw/agents/main/skills/durable-workflows/runs/{runId}.json
-```
-
-**3. The "Emergency Stop" (Code Implementation)**
-You can modify your workflow class to check for a `STOP.flag` file on disk at the start of every step:
-```javascript
-// Inside your @Activity method
-if (fs.existsSync('./STOP.flag')) {
-    throw new Error('EMERGENCY_STOP');
-}
 ```
 
 ---
@@ -199,16 +188,17 @@ Pause a workflow and wait for external input (e.g., human approval via Telegram)
 **Workflow Logic:**
 ```javascript
 async execute(input) {
-    const invoice = await this.downloadInvoice(input.url);
+    const invoice = await this.step('download', async () => getInvoice(input.url));
     
     if (invoice.amount > 1000) {
-        const state = await this.engine.query(this.runId);
-        if (!state.pendingSignals?.find(s => s.signalName === 'APPROVE')) {
+        // Check for signal naturally using the base class method
+        if (!await this.hasSignal('APPROVE')) {
             // Pause execution. The Orchestrator saves state before throwing.
             throw new Error('WORKFLOW_PAUSED: Waiting for approval');
         }
     }
-    await this.processInvoice(invoice);
+    
+    await this.step('process', async () => processInvoice(invoice));
 }
 ```
 
@@ -225,7 +215,7 @@ Check the current state of a running workflow without modifying it.
 
 ```javascript
 const state = await orch.query('wf_abc123');
-console.log(`Current step: ${state.history.length}`);
+console.log(`Current status: ${state.status}`);
 ```
 
 ---
@@ -236,16 +226,17 @@ console.log(`Current step: ${state.history.length}`);
 
 | Method | Description |
 |--------|-------------|
-| `run(WorkflowClass, input)` | Starts or resumes a workflow. Returns `{ status, runId, result }`. |
+| `run(WorkflowClass, input, runId?)` | Starts or resumes a workflow. |
 | `signal(runId, name, data)` | Injects an external event into a paused workflow. |
 | `query(runId)` | Returns the current state and history of a run. |
 
-### `Workflow` & `Activity`
+### `Workflow` Class
 
-| Decorator | Usage |
+| Method | Usage |
 |-----------|-------|
-| `@Workflow(name)` | Class decorator. Defines the orchestration logic. |
-| `@Activity` | Method decorator. Wraps side effects for replay and history. |
+| `async execute(input)` | The main entrypoint. Override this method. |
+| `async step(name, fn)` | Wraps a closure function for side effects. Returns cached history if replayed. |
+| `async hasSignal(name)` | Checks if a signal has been delivered by the Orchestrator. |
 
 ---
 
